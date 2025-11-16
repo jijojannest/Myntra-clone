@@ -307,40 +307,78 @@ class AuthService {
     }
   }
 
-  // Biometric authentication
-  async setupBiometrics(): Promise<boolean> {
+  // Biometric authentication methods
+  async getBiometricConfig() {
+    return await biometricService.isAvailable();
+  }
+
+  async enableBiometricLogin(): Promise<boolean> {
     try {
-      // This would integrate with react-native-biometrics
-      const isSupported = false; // await Biometrics.isSensorAvailable();
-
-      if (isSupported) {
-        // Store credentials securely if biometrics is available
-        return true;
-      }
-
-      return false;
+      const result = await biometricService.enableBiometricLogin();
+      return result.success;
     } catch (error) {
-      console.error('Setup biometrics error:', error);
+      console.error('Enable biometric login error:', error);
+      return false;
+    }
+  }
+
+  async disableBiometricLogin(): Promise<boolean> {
+    try {
+      const result = await biometricService.disableBiometricLogin();
+      return result.success;
+    } catch (error) {
+      console.error('Disable biometric login error:', error);
+      return false;
+    }
+  }
+
+  async isBiometricLoginEnabled(): Promise<boolean> {
+    try {
+      return await biometricService.isBiometricLoginEnabled();
+    } catch (error) {
+      console.error('Check biometric login enabled error:', error);
       return false;
     }
   }
 
   async authenticateWithBiometrics(): Promise<AuthResponse | null> {
     try {
-      // This would implement biometric authentication
-      // const result = await Biometrics.authenticate('Login with biometrics');
+      const result = await biometricService.authenticate('Login with biometrics');
 
-      // if (result.success) {
-      //   const authData = await this.getStoredAuthData();
-      //   if (authData) {
-      //     return authData;
-      //   }
-      // }
+      if (result.success) {
+        const authData = await this.getStoredAuthData();
+        if (authData) {
+          // Validate token before returning
+          const isValid = await this.isTokenValid();
+          if (isValid) {
+            return authData;
+          } else {
+            // Token expired, refresh it
+            try {
+              const refreshedAuth = await this.refreshToken();
+              return refreshedAuth;
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
+              return null;
+            }
+          }
+        }
+      }
 
       return null;
     } catch (error) {
       console.error('Biometric authentication error:', error);
       return null;
+    }
+  }
+
+  async enrollBiometrics(): Promise<boolean> {
+    try {
+      const result = await biometricService.enrollBiometrics();
+      return result.success;
+    } catch (error) {
+      console.error('Enroll biometrics error:', error);
+      return false;
     }
   }
 
