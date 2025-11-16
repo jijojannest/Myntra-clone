@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient, endpoints } from '../utils/api';
 import { User, ApiResponse } from '../types';
+import googleAuthService from './googleAuthService';
+import facebookAuthService from './facebookAuthService';
+import appleAuthService from './appleAuthService';
+import { SocialUser } from '../types/auth';
 
 interface LoginCredentials {
   email: string;
