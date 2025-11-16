@@ -97,6 +97,14 @@ export const handleApiError = (error: any): string => {
   }
 };
 
+// Re-export all API modules
+export * from './authAPI';
+export * from './productsAPI';
+export * from './cartAPI';
+export * from './wishlistAPI';
+export * from './ordersAPI';
+export * from './aiAPI';
+
 // Export API instances
 export { api, aiService };
 export default api;
