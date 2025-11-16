@@ -1,0 +1,37 @@
+{
+  "name": "myntra-clone",
+  "version": "1.0.0",
+  "description": "E-commerce platform with AI virtual try-on capabilities",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\" \"npm run ai:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm start",
+    "ai:dev": "cd ai-service && python -m uvicorn main:app --reload --port 8000",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../ai-service && pip install -r requirements.txt",
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm test",
+    "test:server": "cd server && npm test"
+  },
+  "keywords": [
+    "e-commerce",
+    "myntra",
+    "clothing",
+    "virtual-try-on",
+    "ai",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ]
+}
