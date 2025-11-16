@@ -19,6 +19,8 @@ import { setCredentials, setUser } from '../../store/slices/authSlice';
 import { useApi } from '../../hooks/useApi';
 import { AppError } from '../../types';
 import Toast from 'react-native-toast-message';
+import SocialLoginButtons from '../../components/SocialLoginButtons';
+import BiometricLoginButton from '../../components/BiometricLoginButton';
 
 type LoginScreenProps = NativeStackScreenProps<'Login'>;
 
