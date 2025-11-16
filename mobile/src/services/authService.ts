@@ -4,6 +4,7 @@ import { User, ApiResponse } from '../types';
 import googleAuthService from './googleAuthService';
 import facebookAuthService from './facebookAuthService';
 import appleAuthService from './appleAuthService';
+import biometricService from './biometricService';
 import { SocialUser } from '../types/auth';
 
 interface LoginCredentials {
