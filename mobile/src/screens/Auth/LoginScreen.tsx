@@ -36,7 +36,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   // Custom login API call
   const { data, loading, error } = useApi(
-    () => login(formData.email, formData.password),
+    () => authService.login(formData.email, formData.password),
     [],
     {
       onSuccess: (userData) => {
