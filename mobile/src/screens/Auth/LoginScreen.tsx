@@ -14,7 +14,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { login } from '../../services/authService';
+import { authService } from '../../services/authService';
 import { setCredentials, setUser } from '../../store/slices/authSlice';
 import { useApi } from '../../hooks/useApi';
 import { AppError } from '../../types';
