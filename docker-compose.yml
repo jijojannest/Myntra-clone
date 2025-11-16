@@ -26,6 +26,22 @@ services:
     networks:
       - myntra-network
 
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: myntra-ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONPATH: /app
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - myntra-network
+
   server:
     build:
       context: ./server
