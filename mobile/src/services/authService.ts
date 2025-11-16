@@ -347,37 +347,71 @@ class AuthService {
     }
   }
 
-  // Social login helpers
-  async initiateGoogleLogin(): Promise<void> {
+  // Social login methods
+  async loginWithGoogle(): Promise<AuthResponse> {
     try {
-      // This would integrate with Google Sign-In for React Native
-      // @react-native-google-signin/google-signin
-      console.log('Google login initiated');
+      const socialUser: SocialUser = await googleAuthService.signIn();
+
+      const socialLoginData: SocialLoginData = {
+        provider: 'google',
+        token: socialUser.id, // Use user ID as token for server verification
+        email: socialUser.email,
+        name: socialUser.name,
+      };
+
+      return await this.socialLogin(socialLoginData);
     } catch (error) {
       console.error('Google login error:', error);
       throw error;
     }
   }
 
-  async initiateFacebookLogin(): Promise<void> {
+  async loginWithFacebook(): Promise<AuthResponse> {
     try {
-      // This would integrate with Facebook SDK
-      // react-native-fbsdk-next
-      console.log('Facebook login initiated');
+      const socialUser: SocialUser = await facebookAuthService.signIn();
+
+      const socialLoginData: SocialLoginData = {
+        provider: 'facebook',
+        token: socialUser.id, // Use user ID as token for server verification
+        email: socialUser.email,
+        name: socialUser.name,
+      };
+
+      return await this.socialLogin(socialLoginData);
     } catch (error) {
       console.error('Facebook login error:', error);
       throw error;
     }
   }
 
-  async initiateAppleLogin(): Promise<void> {
+  async loginWithApple(): Promise<AuthResponse> {
     try {
-      // This would integrate with Apple Sign-In
-      // @invertase/react-native-apple-authentication
-      console.log('Apple login initiated');
+      const socialUser: SocialUser = await appleAuthService.signIn();
+
+      const socialLoginData: SocialLoginData = {
+        provider: 'apple',
+        token: socialUser.id, // Use user ID as token for server verification
+        email: socialUser.email,
+        name: socialUser.name,
+      };
+
+      return await this.socialLogin(socialLoginData);
     } catch (error) {
       console.error('Apple login error:', error);
       throw error;
+    }
+  }
+
+  async logoutFromSocialProviders(): Promise<void> {
+    try {
+      await Promise.allSettled([
+        googleAuthService.signOut(),
+        facebookAuthService.signOut(),
+        appleAuthService.signOut(),
+      ]);
+    } catch (error) {
+      console.error('Social providers logout error:', error);
+      // Don't throw error for social logout failures
     }
   }
 
