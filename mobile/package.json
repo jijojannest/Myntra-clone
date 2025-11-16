@@ -18,8 +18,8 @@
     "clean": "react-native clean",
     "pod-install": "cd ios && pod install",
     "postinstall": "cd ios && pod install && cd ../ && cd android && ./gradlew clean",
-    "start-docs": "npx http-server . -p 8000 -c-1 --cors",
-    "serve": "npx http-server . -p 8000 -c-1 --cors"
+    "start-docs": "node docs-server.js",
+    "serve": "node docs-server.js"
   },
   "dependencies": {
     "react": "18.2.0",
