@@ -17,7 +17,9 @@
     "build:ios": "cd ios && xcodebuild -workspace MyntraClone.xcworkspace -scheme MyntraClone -configuration Release",
     "clean": "react-native clean",
     "pod-install": "cd ios && pod install",
-    "postinstall": "cd ios && pod install && cd ../ && cd android && ./gradlew clean"
+    "postinstall": "cd ios && pod install && cd ../ && cd android && ./gradlew clean",
+    "start-docs": "npx http-server . -p 8000 -c-1 --cors",
+    "serve": "npx http-server . -p 8000 -c-1 --cors"
   },
   "dependencies": {
     "react": "18.2.0",
