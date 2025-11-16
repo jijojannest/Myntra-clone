@@ -103,16 +103,12 @@ class AuthService {
       // Call logout endpoint to invalidate token
       await apiClient.post(endpoints.AUTH.LOGOUT);
 
-      // Clear local storage
-      await AsyncStorage.multiRemove([
-        '@auth_token',
-        '@refresh_token',
-        '@user_data',
-        '@remember_me',
-      ]);
+      // Logout from social providers
+      await this.logoutFromSocialProviders();
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if API call fails, clear local storage
+    } finally {
+      // Always clear local storage
       await AsyncStorage.multiRemove([
         '@auth_token',
         '@refresh_token',
