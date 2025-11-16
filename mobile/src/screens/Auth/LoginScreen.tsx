@@ -105,13 +105,38 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple') => {
     try {
-      // Social login implementation
-      Alert.alert('Social Login', `${provider} login would be implemented here`);
-    } catch (error) {
+      let userData;
+
+      switch (provider) {
+        case 'google':
+          userData = await authService.loginWithGoogle();
+          break;
+        case 'facebook':
+          userData = await authService.loginWithFacebook();
+          break;
+        case 'apple':
+          userData = await authService.loginWithApple();
+          break;
+        default:
+          throw new Error('Unsupported social provider');
+      }
+
+      dispatch(setCredentials({
+        accessToken: userData.accessToken,
+        refreshToken: userData.refreshToken,
+      }));
+      dispatch(setUser(userData.user));
+
+      Toast.show({
+        type: 'success',
+        text1: `Logged in with ${provider}!`,
+        position: 'top',
+      });
+    } catch (error: any) {
       console.error(`${provider} login error:`, error);
       Toast.show({
         type: 'error',
-        text1: `${provider} login failed`,
+        text1: error.message || `${provider} login failed`,
         position: 'top',
       });
     }
