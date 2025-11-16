@@ -109,13 +109,22 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Always clear local storage
+      // Always clear local storage including biometric settings
       await AsyncStorage.multiRemove([
         '@auth_token',
         '@refresh_token',
         '@user_data',
         '@remember_me',
+        '@biometric_login_enabled',
+        '@biometric_enrolled',
       ]);
+
+      // Remove biometric keys
+      try {
+        await biometricService.removeBiometricKeys();
+      } catch (error) {
+        console.error('Remove biometric keys error:', error);
+      }
     }
   }
 
