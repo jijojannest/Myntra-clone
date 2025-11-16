@@ -1,0 +1,1321 @@
+openapi: 3.0.3
+info:
+  title: Myntra Clone Mobile API
+  description: Comprehensive API documentation for Myntra Clone mobile application with social authentication, e-commerce features, and AI virtual try-on capabilities.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@myntraclone.com
+    url: https://docs.myntraclone.com/api
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5001/api/v1
+    description: Development server
+  - url: https://staging-api.myntraclone.com/api/v1
+    description: Staging server
+  - url: https://api.myntraclone.com/api/v1
+    description: Production server
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+                phone:
+                  type: string
+                  example: +1234567890
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/social-login:
+    post:
+      tags:
+        - Authentication
+      summary: Social media login
+      description: Authenticate user using social media providers (Google, Facebook, Apple)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - provider
+                - token
+              properties:
+                provider:
+                  type: string
+                  enum: [google, facebook, apple]
+                  example: google
+                token:
+                  type: string
+                  description: OAuth token or user ID from provider
+                  example: google_oauth_token_123
+                email:
+                  type: string
+                  format: email
+                  example: user@gmail.com
+                name:
+                  type: string
+                  example: John Doe
+      responses:
+        '200':
+          description: Social login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Generate new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: jwt_refresh_token_123
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate current access token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Forgot password
+      description: Send password reset link to email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+      responses:
+        '200':
+          description: Reset email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password
+      description: Reset password using reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                  example: reset_token_123
+                newPassword:
+                  type: string
+                  format: password
+                  example: newpassword123
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get products list
+      description: Retrieve paginated list of products with filtering and sorting
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Subcategory'
+        - $ref: '#/components/parameters/Brand'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Color'
+        - $ref: '#/components/parameters/MinPrice'
+        - $ref: '#/components/parameters/MaxPrice'
+        - $ref: '#/components/parameters/Query'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortOrder'
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /products/search:
+    get:
+      tags:
+        - Products
+      summary: Search products
+      description: Search products by text query with optional filters
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+
+  /products/{productId}:
+    get:
+      tags:
+        - Products
+      summary: Get product details
+      description: Retrieve detailed information for a specific product
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /products/filters:
+    get:
+      tags:
+        - Products
+      summary: Get available filters
+      description: Retrieve available filter options for products
+      responses:
+        '200':
+          description: Filters retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FiltersResponse'
+
+  /cart:
+    get:
+      tags:
+        - Shopping Cart
+      summary: Get user cart
+      description: Retrieve current user's shopping cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/add:
+    post:
+      tags:
+        - Shopping Cart
+      summary: Add item to cart
+      description: Add a product variant to the shopping cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+                - variantId
+                - quantity
+              properties:
+                productId:
+                  type: string
+                  example: prod_123
+                variantId:
+                  type: string
+                  example: var_456
+                quantity:
+                  type: integer
+                  minimum: 1
+                  example: 2
+      responses:
+        '200':
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/{itemId}:
+    put:
+      tags:
+        - Shopping Cart
+      summary: Update cart item
+      description: Update quantity of an item in the cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+                  example: 3
+      responses:
+        '200':
+          description: Cart item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cart/{itemId}:
+    delete:
+      tags:
+        - Shopping Cart
+      summary: Remove from cart
+      description: Remove an item from the shopping cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      responses:
+        '200':
+          description: Item removed from cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cart/clear:
+    delete:
+      tags:
+        - Shopping Cart
+      summary: Clear cart
+      description: Remove all items from the shopping cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart cleared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+
+  /wishlist:
+    get:
+      tags:
+        - Wishlist
+      summary: Get user wishlist
+      description: Retrieve current user's wishlist
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Wishlist retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistResponse'
+
+  /wishlist:
+    post:
+      tags:
+        - Wishlist
+      summary: Add to wishlist
+      description: Add a product variant to the wishlist
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+                - variantId
+              properties:
+                productId:
+                  type: string
+                  example: prod_123
+                variantId:
+                  type: string
+                  example: var_456
+      responses:
+        '200':
+          description: Item added to wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistResponse'
+
+  /wishlist/{itemId}:
+    delete:
+      tags:
+        - Wishlist
+      summary: Remove from wishlist
+      description: Remove an item from the wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistItemId'
+      responses:
+        '200':
+          description: Item removed from wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+
+  /wishlist/{itemId}/move-to-cart:
+    post:
+      tags:
+        - Wishlist
+      summary: Move to cart
+      description: Move an item from wishlist to shopping cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistItemId'
+      responses:
+        '200':
+          description: Item moved to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Get user orders
+      description: Retrieve paginated list of user's orders
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, shipped, delivered, cancelled]
+          description: Filter by order status
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdersResponse'
+
+  /orders:
+    post:
+      tags:
+        - Orders
+      summary: Create order
+      description: Create a new order from cart items
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '200':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Get order details
+      description: Retrieve detailed information for a specific order
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ai/detect-pose:
+    post:
+      tags:
+        - AI Virtual Try-On
+      summary: Detect body pose
+      description: Analyze user image to detect body pose landmarks
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  description: Base64 encoded image data
+                  example: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...
+      responses:
+        '200':
+          description: Pose detected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoseDetectionResponse'
+
+  /ai/try-on:
+    post:
+      tags:
+        - AI Virtual Try-On
+      summary: Process virtual try-on
+      description: Generate virtual try-on image using AI
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+                - userImage
+              properties:
+                productId:
+                  type: string
+                  example: prod_123
+                userImage:
+                  type: string
+                  description: Base64 encoded user photo
+                  example: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...
+                clothingImage:
+                  type: string
+                  example: https://example.com/clothing.jpg
+                poseLandmarks:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PoseLandmark'
+                size:
+                  type: string
+                  example: M
+                color:
+                  type: string
+                  example: Black
+      responses:
+        '200':
+          description: Virtual try-on processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualTryOnResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      description: Page number
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Items per page
+    Category:
+      name: category
+      in: query
+      schema:
+        type: string
+      description: Filter by category
+    Subcategory:
+      name: subcategory
+      in: query
+      schema:
+        type: string
+      description: Filter by subcategory
+    Brand:
+      name: brand
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter by brand(s)
+    Size:
+      name: size
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter by size(s)
+    Color:
+      name: color
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter by color(s)
+    MinPrice:
+      name: minPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+      description: Minimum price filter
+    MaxPrice:
+      name: maxPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+      description: Maximum price filter
+    Query:
+      name: q
+      in: query
+      schema:
+        type: string
+      description: Search query
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+        enum: [relevance, price_low_high, price_high_low, newest_first, rating, popularity]
+        default: relevance
+      description: Sort by field
+    SortOrder:
+      name: sortOrder
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      description: Sort order
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Product ID
+    CartItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Cart item ID
+    WishlistItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Wishlist item ID
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Order ID
+
+  schemas:
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Error message
+        code:
+          type: string
+          example: ERROR_CODE
+        timestamp:
+          type: string
+          format: date-time
+          example: 2023-01-01T00:00:00Z
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+              example: jwt_access_token_123
+            refreshToken:
+              type: string
+              example: jwt_refresh_token_456
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user_123
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: +1234567890
+        avatar:
+          type: string
+          format: uri
+          example: https://example.com/avatar.jpg
+        isEmailVerified:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-01-01T00:00:00Z
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          example: prod_123
+        name:
+          type: string
+          example: Nike Air Max
+        brand:
+          type: string
+          example: Nike
+        description:
+          type: string
+          example: Comfortable running shoes...
+        price:
+          type: number
+          example: 9999
+        discountPrice:
+          type: number
+          example: 7999
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+        category:
+          type: string
+          example: footwear
+        subcategory:
+          type: string
+          example: running
+        rating:
+          type: number
+          example: 4.5
+        reviews:
+          type: integer
+          example: 127
+        inStock:
+          type: boolean
+          example: true
+
+    ProductsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        pages:
+          type: integer
+          example: 8
+
+    ProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Product'
+
+    CartResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartItem'
+            total:
+              type: number
+              example: 15998
+            itemCount:
+              type: integer
+              example: 2
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: cart_item_123
+        product:
+          $ref: '#/components/schemas/Product'
+        variant:
+          $ref: '#/components/schemas/ProductVariant'
+        quantity:
+          type: integer
+          example: 2
+        subtotal:
+          type: number
+          example: 15996
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: string
+          example: var_456
+        size:
+          type: string
+          example: 9
+        color:
+          type: string
+          example: Black
+        price:
+          type: number
+          example: 9999
+        discountPrice:
+          type: number
+          example: 7999
+        stock:
+          type: integer
+          example: 50
+        sku:
+          type: string
+          example: NIKE-001
+
+    WishlistResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
+
+    WishlistItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: wishlist_item_123
+        product:
+          $ref: '#/components/schemas/Product'
+        variant:
+          $ref: '#/components/schemas/ProductVariant'
+        addedAt:
+          type: string
+          format: date-time
+          example: 2023-01-01T00:00:00Z
+
+    CreateOrderRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              variantId:
+                type: string
+              quantity:
+                type: integer
+              size:
+                type: string
+              color:
+                type: string
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        paymentInfo:
+          type: object
+          properties:
+            method:
+              type: string
+              enum: [credit_card, debit_card, upi, cod, net_banking, wallet]
+            amount:
+              type: number
+            currency:
+              type: string
+              default: INR
+        shippingMethod:
+          type: object
+          properties:
+            name:
+              type: string
+            price:
+              type: number
+            estimatedDays:
+              type: integer
+        couponCode:
+          type: string
+        notes:
+          type: string
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: 123 Main St
+        city:
+          type: string
+          example: Mumbai
+        state:
+          type: string
+          example: Maharashtra
+        pincode:
+          type: string
+          example: 400001
+        landmark:
+          type: string
+          example: Near Railway Station
+        phone:
+          type: string
+          example: +1234567890
+
+    OrdersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          example: order_123
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              name:
+                type: string
+              price:
+                type: number
+              size:
+                type: string
+              color:
+                type: string
+              quantity:
+                type: integer
+              image:
+                type: string
+        totalAmount:
+          type: number
+          example: 15998
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+          example: pending
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-01-01T00:00:00Z
+
+    OrderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Order'
+
+    PoseDetectionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            poseLandmarks:
+              type: array
+              items:
+                $ref: '#/components/schemas/PoseLandmark'
+            confidence:
+              type: number
+              example: 0.95
+
+    PoseLandmark:
+      type: object
+      properties:
+        x:
+          type: number
+          example: 100
+        y:
+          type: number
+          example: 150
+        z:
+          type: number
+          example: 0
+        type:
+          type: string
+          example: nose_tip
+
+    VirtualTryOnResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            resultImage:
+              type: string
+              description: Base64 encoded result image
+              example: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...
+            confidence:
+              type: number
+              example: 0.87
+            processingTime:
+              type: number
+              example: 2.3
+            fitScore:
+              type: number
+              example: 0.92
+
+    FiltersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            categories:
+              type: array
+              items:
+                type: string
+            brands:
+              type: array
+              items:
+                type: string
+            sizes:
+              type: array
+              items:
+                type: string
+            colors:
+              type: array
+              items:
+                type: string
+            priceRanges:
+              type: array
+              items:
+                type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Products
+    description: Product catalog and search endpoints
+  - name: Shopping Cart
+    description: Shopping cart management endpoints
+  - name: Wishlist
+    description: Wishlist management endpoints
+  - name: Orders
+    description: Order management endpoints
+  - name: AI Virtual Try-On
+    description: AI-powered virtual try-on endpoints
