@@ -167,31 +167,25 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </View>
 
           {/* Social Login Buttons */}
-          <View style={styles.socialButtons}>
-            <TouchableOpacity
-              style={[styles.socialButton, styles.googleButton]}
-              onPress={() => handleSocialLogin('google')}
-            >
-              <Icon name="google" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Google</Text>
-            </TouchableOpacity>
+          <SocialLoginButtons
+            onSuccess={() => {
+              // Navigation will be handled by Redux state change
+            }}
+            onError={(error) => {
+              console.error('Social login error:', error);
+            }}
+          />
 
-            <TouchableOpacity
-              style={[styles.socialButton, styles.facebookButton]}
-              onPress={() => handleSocialLogin('facebook')}
-            >
-              <Icon name="facebook" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Facebook</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.socialButton, styles.appleButton]}
-              onPress={() => handleSocialLogin('apple')}
-            >
-              <Icon name="apple" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Apple</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Biometric Login Button */}
+          <BiometricLoginButton
+            onSuccess={() => {
+              // Navigation will be handled by Redux state change
+            }}
+            onError={(error) => {
+              console.error('Biometric login error:', error);
+            }}
+            style={{ marginBottom: 20 }}
+          />
 
           {/* Divider */}
           <View style={styles.divider}>
