@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: myntra-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: myntra_clone
+    volumes:
+      - mongodb_data:/data/db
+      - ./server/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - myntra-network
+
+  redis:
+    image: redis:alpine
+    container_name: myntra-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - myntra-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  myntra-network:
+    driver: bridge
