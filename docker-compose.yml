@@ -84,22 +84,7 @@ services:
     networks:
       - myntra-network
 
-  ai-service:
-    build:
-      context: ./ai-service
-      dockerfile: Dockerfile
-    container_name: myntra-ai-service
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      PYTHONPATH: /app
-    volumes:
-      - ./ai-service:/app
-    networks:
-      - myntra-network
-
-volumes:
+  volumes:
   mongodb_data:
 
 networks:
