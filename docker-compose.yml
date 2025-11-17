@@ -84,7 +84,7 @@ services:
     networks:
       - myntra-network
 
-  volumes:
+volumes:
   mongodb_data:
 
 networks:
